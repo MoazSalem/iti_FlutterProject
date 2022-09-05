@@ -10,6 +10,6 @@ class searchPage extends StatefulWidget {
 class _searchPageState extends State<searchPage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return SafeArea(child: Scaffold());
   }
 }

@@ -1,22 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
 import 'package:material_color_generator/material_color_generator.dart';
-import 'Screens/mainPage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'Screens/Start/mainPage.dart';
+import 'Screens/Start/onBoarding.dart';
+import 'Screens/Start/start_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
+      statusBarBrightness: Brightness.light, // For iOS (dark icons)
+    ),
+  );
   await Firebase.initializeApp();
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Color(0xFFFAFAFA),
-      statusBarIconBrightness: Brightness.dark,
-      statusBarBrightness: Brightness.light,
-      systemNavigationBarColor: Color(0xFFFAFAFA),systemNavigationBarIconBrightness: Brightness.dark));
-  runApp(const MyApp());
+  final prefs = await SharedPreferences.getInstance();
+  final showHome = prefs.getBool('showHome') ?? false;
+  final loggedIn = prefs.getBool('LoggedIn') ?? false;
+  prefs.setBool("showHome", true);
+  runApp(MyApp(
+    showHome: showHome,
+    LoggedIn: loggedIn,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  bool showHome;
+  bool LoggedIn;
+
+  MyApp({Key? key, required this.showHome, required this.LoggedIn})
+      : super(key: key);
 
   // This widget is the root of your application.
   @override
@@ -26,7 +42,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: generateMaterialColor(color: const Color(0xFF22A45D)),
       ),
-      home: mainPage(),
+      home: showHome
+          ? LoggedIn
+              ? const mainPage()
+              : Start()
+          : const introPage(),
     );
   }
 }

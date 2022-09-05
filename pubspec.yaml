@@ -41,6 +41,9 @@ dependencies:
   cloud_firestore: ^3.4.6
   carousel_slider: ^4.1.1
   font_awesome_flutter: ^10.1.0
+  smooth_page_indicator: ^1.0.0+2
+  shared_preferences: ^2.0.15
+  awesome_snackbar_content: ^0.0.8
 
 
 dev_dependencies:

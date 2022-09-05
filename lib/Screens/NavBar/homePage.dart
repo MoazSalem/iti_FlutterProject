@@ -5,6 +5,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../Models/header.dart';
 import '../../Models/restaurant.dart';
+import '../../Widgets/appBar.dart';
 import '../../Widgets/drawer.dart';
 
 GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
@@ -23,82 +24,78 @@ class homePage extends StatefulWidget {
 }
 
 class homePageState extends State<homePage> {
-  String dropdownvalue = 'Zagazig';
-  var Places = ["Alexandria","Cairo","Kafr El-Shaikh","Mansoura","Zagazig"];
+  String dropDownValue = 'Zagazig';
+  var places = ["Alexandria", "Cairo", "Kafr El-Shaikh", "Mansoura", "Zagazig"];
 
-  PreferredSizeWidget appBar() { // Defining My Own Custom AppBar
-    return PreferredSize(
-        preferredSize: const Size(double.infinity, 80),
-        child: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: Theme.of(context).canvasColor,
-          elevation: 1,
-          shadowColor: Colors.grey.shade100,
-          flexibleSpace: SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text(
-                  "DELIVERY TO",
-                  style: TextStyle(fontSize: 12, color: mainColor),
-                ),
-                Stack(
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: IconButton(
-                          onPressed: () => scaffoldKey.currentState?.openDrawer(),
-                          icon: Icon(FontAwesomeIcons.bars,size: 18,)),
-                    ),
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        DropdownButton(
-                          borderRadius: BorderRadius.circular(10),
-                          alignment: Alignment.center,
-                          underline: Container(),
-                          style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 21,
-                              fontWeight: FontWeight.w500),
-                          dropdownColor: Theme.of(context).canvasColor,
-                          elevation: 0,
-                          isDense: true,
-                          iconEnabledColor: Colors.black,
-                          value: dropdownvalue,
-                          icon: const Icon(Icons.keyboard_arrow_down),
-                          items: Places.map((String items) {
-                            return DropdownMenuItem(
-                              value: items,
-                              child: Text(items),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              dropdownvalue = newValue!;
-                            });
-                          },
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(right: 30),
-                              child: Text("Filter",style: TextStyle(fontSize: 16)),
-                            )
-                          ],
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+  Widget appBarWidget() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: IconButton(
+                  onPressed: () => scaffoldKey.currentState?.openDrawer(),
+                  icon: const Icon(
+                    FontAwesomeIcons.bars,
+                    size: 18,
+                  )),
             ),
-          ),
-          centerTitle: true,
-        ));
+            Container(
+              height: 80,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 45, right: 10),
+                    child: const Text(
+                      "DELIVERY TO",
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: mainColor,
+                          fontWeight: FontWeight.w400),
+                    ),
+                  ),
+                  DropdownButton(
+                    borderRadius: BorderRadius.circular(10),
+                    alignment: Alignment.center,
+                    underline: Container(),
+                    style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 21,
+                        fontWeight: FontWeight.w500),
+                    dropdownColor: Theme.of(context).canvasColor,
+                    elevation: 0,
+                    isDense: true,
+                    iconEnabledColor: Colors.black,
+                    value: dropDownValue,
+                    icon: const Icon(Icons.keyboard_arrow_down),
+                    items: places.map((String items) {
+                      return DropdownMenuItem(
+                        value: items,
+                        child: Text(items),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        dropDownValue = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: 30),
+              child: Text("Filter", style: TextStyle(fontSize: 16)),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -106,7 +103,8 @@ class homePageState extends State<homePage> {
     return Scaffold(
       key: scaffoldKey,
       drawer: MyDrawer(),
-      appBar: appBar(),
+      appBar: appBar(
+          context: context, mainWidget: appBarWidget(), height: 80, shadow: 1),
       body: FutureBuilder(
           future: getListWidgets(),
           builder: (context, snapshot) => ListView(
@@ -137,7 +135,7 @@ class homePageState extends State<homePage> {
                             child: Container(
                               width: 12.0,
                               height: 12.0,
-                              margin: EdgeInsets.symmetric(
+                              margin: const EdgeInsets.symmetric(
                                   vertical: 8.0, horizontal: 4.0),
                               decoration: BoxDecoration(
                                   shape: BoxShape.circle,
@@ -150,19 +148,19 @@ class homePageState extends State<homePage> {
                     ],
                   ),
                   Padding(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                         left: 20, right: 20, top: 30, bottom: 5),
                     child: Stack(
                       alignment: Alignment.centerLeft,
                       children: [
-                        Text(
+                        const Text(
                           "All Restaurants",
                           style: TextStyle(
                               fontSize: 26, fontWeight: FontWeight.w700),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
+                          children: const [
                             Text(
                               "See All",
                               style: TextStyle(
@@ -188,7 +186,7 @@ class homePageState extends State<homePage> {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   )
                 ],
@@ -252,7 +250,7 @@ Widget restaurantWidget(double height, bool isTall) {
                           Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
-                              gradient: LinearGradient(
+                              gradient: const LinearGradient(
                                 colors: [
                                   Color.fromARGB(200, 0, 0, 0),
                                   Color.fromARGB(20, 0, 0, 0),
@@ -273,16 +271,17 @@ Widget restaurantWidget(double height, bool isTall) {
                                       bottom: 5, left: 10),
                                   child: Row(
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.speed,
                                         color: Colors.white,
                                       ),
-                                      SizedBox(
+                                      const SizedBox(
                                         width: 5,
                                       ),
                                       Text(
                                         "${restaurantList[index].time} min",
-                                        style: TextStyle(color: Colors.white),
+                                        style: const TextStyle(
+                                            color: Colors.white),
                                       )
                                     ],
                                   ),
@@ -304,7 +303,7 @@ Widget restaurantWidget(double height, bool isTall) {
                                             ),
                                             Text(
                                               restaurantList[index].price,
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   color: Colors.white),
                                             ),
                                           ],
@@ -325,7 +324,7 @@ Widget restaurantWidget(double height, bool isTall) {
                                             child: Center(
                                               child: Text(
                                                 restaurantList[index].reviews,
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                     color: Colors.white,
                                                     fontWeight:
                                                         FontWeight.w400),
@@ -342,15 +341,15 @@ Widget restaurantWidget(double height, bool isTall) {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 10, top: 6),
+                      padding: const EdgeInsets.only(left: 10, top: 6),
                       child: Text(restaurantList[index].name,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontWeight: FontWeight.w700, fontSize: 20)),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 10, top: 2),
+                      padding: const EdgeInsets.only(left: 10, top: 2),
                       child: Text(restaurantList[index].type,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontWeight: FontWeight.w400,
                               fontSize: 16,
                               color: Colors.grey)),
@@ -427,7 +426,7 @@ Future<void> getListWidgets() async {
                 left: 0.0,
                 right: 0.0,
                 child: Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                       gradient: LinearGradient(
                     colors: [
                       Color.fromARGB(200, 0, 0, 0),
@@ -440,7 +439,7 @@ Future<void> getListWidgets() async {
                       vertical: 10.0, horizontal: 20.0),
                   child: Text(
                     item.Name,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20.0,
                       fontWeight: FontWeight.bold,
