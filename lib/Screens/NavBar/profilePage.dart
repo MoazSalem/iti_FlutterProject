@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../Models/user.dart';
 
 UserModel User = UserModel(name: "name", email: "email", phone: "phone");
+bool isLoading = true;
 
 class profilePage extends StatefulWidget {
   const profilePage({Key? key}) : super(key: key);
@@ -15,36 +16,48 @@ class profilePage extends StatefulWidget {
 class _profilePageState extends State<profilePage> {
   @override
   void initState() {
-    WidgetsFlutterBinding.ensureInitialized();
     super.initState();
     getUser();
+  }
+
+  Future<void> getUser() async {
+    UserModel? temp;
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get()
+        .then((value) {
+      if (value != null) {
+        temp = UserModel.fromJson(value.data() as Map<String, dynamic>);
+        User = temp!;
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        print('Document does not exist on the database');
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-        child: Scaffold(
-            body: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [Text(User.name), Text(User.email), Text(User.phone)],
-      ),
-    )));
+      child: isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(User.name),
+                    Text(User.email),
+                    Text(User.phone)
+                  ],
+                ),
+              ),
+            ),
+    );
   }
-}
-
-Future<void> getUser() async {
-  UserModel? temp;
-  FirebaseFirestore.instance
-      .collection('users')
-      .doc(FirebaseAuth.instance.currentUser!.uid)
-      .get()
-      .then((value) {
-    if (value != null) {
-      temp = UserModel.fromJson(value.data() as Map<String, dynamic>);
-      User = temp!;
-    } else {
-      print('Document does not exist on the database');
-    }
-  });
 }
