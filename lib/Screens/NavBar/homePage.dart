@@ -28,22 +28,19 @@ class homePageState extends State<homePage> {
   var places = ["Alexandria", "Cairo", "Kafr El-Shaikh", "Mansoura", "Zagazig"];
 
   Widget appBarWidget() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 20),
+    return Padding(
+      padding: const EdgeInsets.only(top: 30, left: 15, right: 15),
+      child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 10),
-              child: IconButton(
-                  onPressed: () => scaffoldKey.currentState?.openDrawer(),
-                  icon: const Icon(
-                    FontAwesomeIcons.bars,
-                    size: 18,
-                  )),
-            ),
+            IconButton(
+                onPressed: () => scaffoldKey.currentState?.openDrawer(),
+                icon: const Icon(
+                  FontAwesomeIcons.bars,
+                  size: 18,
+                )),
             Container(
               height: 80,
               child: Stack(
@@ -88,9 +85,21 @@ class homePageState extends State<homePage> {
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(right: 30),
-              child: Text("Filter", style: TextStyle(fontSize: 16)),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(Icons.shopping_cart),
+                Padding(
+                  padding: const EdgeInsets.only(left: 25, bottom: 20),
+                  child: CircleAvatar(
+                    radius: 8,
+                    backgroundColor: mainColor,
+                    child: Text("0",
+                        style:
+                            TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  ),
+                )
+              ],
             ),
           ],
         ),
@@ -104,13 +113,13 @@ class homePageState extends State<homePage> {
       key: scaffoldKey,
       drawer: MyDrawer(),
       appBar: appBar(
-          context: context, mainWidget: appBarWidget(), height: 80, shadow: 1),
+          context: context, mainWidget: appBarWidget(), height: 70, shadow: 1),
       body: FutureBuilder(
           future: getListWidgets(),
           builder: (context, snapshot) => ListView(
                 children: [
                   const SizedBox(
-                    height: 10,
+                    height: 20,
                   ),
                   Stack(
                     children: [
@@ -180,8 +189,8 @@ class homePageState extends State<homePage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          restaurantWidget(220, false),
-                          restaurantWidget(280, true),
+                          restaurantWidget(230, false),
+                          restaurantWidget(290, true),
                         ],
                       ),
                     ),
@@ -199,10 +208,14 @@ class homePageState extends State<homePage> {
 Widget restaurantWidget(double height, bool isTall) {
   return Flexible(
     child: ListView.builder(
-        reverse: isTall,
+        reverse: !isTall,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: restaurantList.length,
+        itemCount: isTall
+            ? restaurantList.length - 1 < 0
+                ? 0
+                : restaurantList.length - 1
+            : restaurantList.length,
         itemBuilder: (context, index) => Padding(
               padding: const EdgeInsets.only(top: 10),
               child: Center(
@@ -218,7 +231,7 @@ Widget restaurantWidget(double height, bool isTall) {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(10),
                             child: Container(
-                              width: 160,
+                              width: 170,
                               height: height,
                               child: Image.network(
                                 isTall
@@ -261,7 +274,7 @@ Widget restaurantWidget(double height, bool isTall) {
                               ),
                             ),
                             height: height,
-                            width: 160,
+                            width: 170,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.end,
                               crossAxisAlignment: CrossAxisAlignment.start,

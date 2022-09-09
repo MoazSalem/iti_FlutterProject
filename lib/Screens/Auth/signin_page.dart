@@ -31,7 +31,7 @@ class _SignInScreenState extends State<SignInScreen> {
       key: _formKey,
       child: Scaffold(
         appBar: appBar(
-            height: 80,
+            height: 70,
             context: context,
             mainWidget: titleWidget(context, "Sign in"),
             shadow: 0),
