@@ -4,7 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 Widget titleWidget(BuildContext context, String title,
     {double? titleSize, bool Drawer = false, scaffoldKey}) {
   return Padding(
-    padding: const EdgeInsets.only(top: 30),
+    padding: const EdgeInsets.only(top: 34),
     child: Stack(
       alignment: Alignment.centerLeft,
       children: [

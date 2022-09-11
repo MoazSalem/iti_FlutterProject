@@ -3,18 +3,25 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:foodly/Screens/NavBar/Cart.dart';
+import 'package:foodly/Widgets/button.dart';
+import '../../Models/food.dart';
 import '../../Models/header.dart';
 import '../../Models/restaurant.dart';
 import '../../Widgets/appBar.dart';
 import '../../Widgets/drawer.dart';
+import '../../app_data.dart';
 
 GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 int _current = 0;
 List<headerModel> imgList = [];
 List<restaurantModel> restaurantList = [];
+List<restaurantModel> searchedRestaurantList = [];
+List<Food> cart = [];
 List<Widget> ImageSliders = [];
 final CarouselController _controller = CarouselController();
 const Color mainColor = Color(0xFF22A45D);
+int cartCount = 0;
 
 class homePage extends StatefulWidget {
   const homePage({Key? key}) : super(key: key);
@@ -27,9 +34,10 @@ class homePageState extends State<homePage> {
   String dropDownValue = 'Zagazig';
   var places = ["Alexandria", "Cairo", "Kafr El-Shaikh", "Mansoura", "Zagazig"];
 
+  //Custom appBar
   Widget appBarWidget() {
     return Padding(
-      padding: const EdgeInsets.only(top: 30, left: 15, right: 15),
+      padding: const EdgeInsets.only(top: 35, left: 15, right: 15),
       child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -88,15 +96,26 @@ class homePageState extends State<homePage> {
             Stack(
               alignment: Alignment.center,
               children: [
-                Icon(Icons.shopping_cart),
+                IconButton(
+                    constraints: BoxConstraints(maxWidth: 40),
+                    icon: Icon(Icons.shopping_cart),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Cart(),
+                          )).then((value) => setState(() {}));
+                    }),
                 Padding(
                   padding: const EdgeInsets.only(left: 25, bottom: 20),
                   child: CircleAvatar(
                     radius: 8,
                     backgroundColor: mainColor,
-                    child: Text("0",
-                        style:
-                            TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    child: Center(
+                      child: Text(cartCount.toString(),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 12)),
+                    ),
                   ),
                 )
               ],
@@ -104,6 +123,294 @@ class homePageState extends State<homePage> {
           ],
         ),
       ),
+    );
+  }
+
+  //Custom restaurants widget
+  Widget restaurantWidget(double height, bool isTall) {
+    return Flexible(
+      child: ListView.builder(
+          reverse: !isTall,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: isTall
+              ? restaurantList.length - 1 < 0
+                  ? 0
+                  : restaurantList.length - 1
+              : restaurantList.length,
+          itemBuilder: (context, index) => Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: GestureDetector(
+                  onTap: () => showBottomSheet(
+                      constraints: BoxConstraints(maxHeight: 400),
+                      context: context,
+                      builder: (context) {
+                        int reverseIndex = restaurantList.length - index - 1;
+                        return Column(
+                          children: [
+                            Container(
+                              height: 260,
+                              child: ListView.separated(
+                                  separatorBuilder: (context, index) =>
+                                      Divider(height: 2),
+                                  shrinkWrap: true,
+                                  itemCount:
+                                      restaurantsMenu[reverseIndex].menu.length,
+                                  itemBuilder: (context, index2) {
+                                    int Count = restaurantsMenu[reverseIndex]
+                                        .menu[index2]
+                                        .count;
+                                    return StatefulBuilder(
+                                        builder: ((context, setState) {
+                                      return ListTile(
+                                        title: Text(
+                                            restaurantsMenu[reverseIndex]
+                                                .menu[index2]
+                                                .name,
+                                            style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold)),
+                                        subtitle: Padding(
+                                          padding: const EdgeInsets.only(top: 5),
+                                          child: Text(
+                                            "${restaurantsMenu[reverseIndex].menu[index2].price} EGP",
+                                            style: TextStyle(fontSize: 16),
+                                          ),
+                                        ),
+                                        trailing: Container(
+                                          width: 100,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              IconButton(
+                                                constraints:
+                                                    BoxConstraints(maxWidth: 40),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    Count++;
+                                                    restaurantsMenu[reverseIndex]
+                                                        .menu[index2]
+                                                        .count = Count;
+                                                  });
+                                                },
+                                                icon: Icon(
+                                                  Icons.add,
+                                                  size: 28,
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.all(6),
+                                                child: Text(Count.toString()),
+                                              ),
+                                              IconButton(
+                                                constraints:
+                                                    BoxConstraints(maxWidth: 40),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    Count == 0 ? null : Count--;
+                                                    restaurantsMenu[reverseIndex]
+                                                        .menu[index2]
+                                                        .count = Count;
+                                                  });
+                                                },
+                                                icon: Icon(
+                                                  Icons.remove,
+                                                  size: 28,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }));
+                                  }),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Button(
+                                  label: "Add To Cart",
+                                  onTap: () {
+                                    setState(() {
+                                      restaurantsMenu[reverseIndex]
+                                          .menu
+                                          .forEach((element) {
+                                        if (element.count != 0) {
+                                          if (cart.contains(element)) {
+                                          } else {
+                                            cart.add(element);
+                                          }
+                                        }
+                                        int temp = 0;
+                                        cart.forEach((element) {
+                                          temp += element.count;
+                                        });
+                                        cartCount = temp;
+                                      });
+                                    });
+                                    Navigator.of(context).pop();
+                                  }),
+                            )
+                          ],
+                        );
+                      }),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Stack(
+                            alignment: Alignment.bottomLeft,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Container(
+                                  width: 170,
+                                  height: height,
+                                  child: Image.network(
+                                    isTall
+                                        ? restaurantList[index].tall_link == ""
+                                            ? restaurantList[index].link
+                                            : restaurantList[index].tall_link
+                                        : restaurantList[index].link,
+                                    fit: BoxFit.fitHeight,
+                                    loadingBuilder: (BuildContext context,
+                                        Widget child,
+                                        ImageChunkEvent? loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Center(
+                                        child: CircularProgressIndicator(
+                                          value: loadingProgress
+                                                      .expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color.fromARGB(200, 0, 0, 0),
+                                      Color.fromARGB(20, 0, 0, 0),
+                                      Color.fromARGB(0, 0, 0, 0)
+                                    ],
+                                    begin: Alignment.bottomCenter,
+                                    end: Alignment.topCenter,
+                                  ),
+                                ),
+                                height: height,
+                                width: 170,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          bottom: 5, left: 10),
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.speed,
+                                            color: Colors.white,
+                                          ),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            "${restaurantList[index].time} min",
+                                            style: const TextStyle(
+                                                color: Colors.white),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                        padding: const EdgeInsets.only(
+                                            bottom: 20, left: 10),
+                                        child: Stack(
+                                          alignment: Alignment.centerRight,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons
+                                                      .monetization_on_outlined,
+                                                  color: Colors.white,
+                                                ),
+                                                const SizedBox(
+                                                  width: 5,
+                                                ),
+                                                Text(
+                                                  restaurantList[index].price,
+                                                  style: const TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                              ],
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 16),
+                                              child: Container(
+                                                decoration: ShapeDecoration
+                                                    .fromBoxDecoration(
+                                                        BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        6),
+                                                            color: mainColor)),
+                                                width: 40,
+                                                height: 22,
+                                                child: Center(
+                                                  child: Text(
+                                                    restaurantList[index]
+                                                        .reviews,
+                                                    style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.w400),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        )),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10, top: 6),
+                          child: Text(restaurantList[index].name,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 20)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10, top: 2),
+                          child: Text(restaurantList[index].type,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 16,
+                                  color: Colors.grey)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )),
     );
   }
 
@@ -204,176 +511,6 @@ class homePageState extends State<homePage> {
   }
 }
 
-//Custom restaurants widget
-Widget restaurantWidget(double height, bool isTall) {
-  return Flexible(
-    child: ListView.builder(
-        reverse: !isTall,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: isTall
-            ? restaurantList.length - 1 < 0
-                ? 0
-                : restaurantList.length - 1
-            : restaurantList.length,
-        itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Stack(
-                        alignment: Alignment.bottomLeft,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: 170,
-                              height: height,
-                              child: Image.network(
-                                isTall
-                                    ? restaurantList[index].tall_link == ""
-                                        ? restaurantList[index].link
-                                        : restaurantList[index].tall_link
-                                    : restaurantList[index].link,
-                                fit: BoxFit.fitHeight,
-                                loadingBuilder: (BuildContext context,
-                                    Widget child,
-                                    ImageChunkEvent? loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      value:
-                                          loadingProgress.expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  loadingProgress
-                                                      .expectedTotalBytes!
-                                              : null,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color.fromARGB(200, 0, 0, 0),
-                                  Color.fromARGB(20, 0, 0, 0),
-                                  Color.fromARGB(0, 0, 0, 0)
-                                ],
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
-                              ),
-                            ),
-                            height: height,
-                            width: 170,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      bottom: 5, left: 10),
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.speed,
-                                        color: Colors.white,
-                                      ),
-                                      const SizedBox(
-                                        width: 5,
-                                      ),
-                                      Text(
-                                        "${restaurantList[index].time} min",
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                    padding: const EdgeInsets.only(
-                                        bottom: 20, left: 10),
-                                    child: Stack(
-                                      alignment: Alignment.centerRight,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.monetization_on_outlined,
-                                              color: Colors.white,
-                                            ),
-                                            const SizedBox(
-                                              width: 5,
-                                            ),
-                                            Text(
-                                              restaurantList[index].price,
-                                              style: const TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                          ],
-                                        ),
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 16),
-                                          child: Container(
-                                            decoration: ShapeDecoration
-                                                .fromBoxDecoration(
-                                                    BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(6),
-                                                        color: mainColor)),
-                                            width: 40,
-                                            height: 22,
-                                            child: Center(
-                                              child: Text(
-                                                restaurantList[index].reviews,
-                                                style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight:
-                                                        FontWeight.w400),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    )),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10, top: 6),
-                      child: Text(restaurantList[index].name,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 20)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10, top: 2),
-                      child: Text(restaurantList[index].type,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              color: Colors.grey)),
-                    ),
-                  ],
-                ),
-              ),
-            )),
-  );
-}
-
 //Get Restaurants Data from firestore
 Future<void> getRestaurants() async {
   List<restaurantModel> temp = [];
@@ -407,62 +544,61 @@ Future<void> getPhotos() async {
   });
 }
 
+//Get All Widgets Ready
 Future<void> getListWidgets() async {
   await getPhotos();
   getRestaurants();
   List<Widget> imageSliders = imgList.map((item) {
-    return Container(
-      child: ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-          child: Stack(
-            children: [
-              Image.network(
-                item.Link,
-                fit: BoxFit.cover,
-                height: 1000,
-                width: 1000,
-                loadingBuilder: (BuildContext context, Widget child,
-                    ImageChunkEvent? loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                    ),
-                  );
-                },
-              ),
-              Positioned(
-                bottom: 0.0,
-                left: 0.0,
-                right: 0.0,
-                child: Container(
-                  decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                    colors: [
-                      Color.fromARGB(200, 0, 0, 0),
-                      Color.fromARGB(0, 0, 0, 0)
-                    ],
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                  )),
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 10.0, horizontal: 20.0),
-                  child: Text(
-                    item.Name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+    return ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+        child: Stack(
+          children: [
+            Image.network(
+              item.Link,
+              fit: BoxFit.cover,
+              height: 1000,
+              width: 1000,
+              loadingBuilder: (BuildContext context, Widget child,
+                  ImageChunkEvent? loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Center(
+                  child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                            loadingProgress.expectedTotalBytes!
+                        : null,
+                  ),
+                );
+              },
+            ),
+            Positioned(
+              bottom: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: Container(
+                decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                  colors: [
+                    Color.fromARGB(200, 0, 0, 0),
+                    Color.fromARGB(0, 0, 0, 0)
+                  ],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                )),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 10.0, horizontal: 20.0),
+                child: Text(
+                  item.Name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-            ],
-          )),
-    );
+            ),
+          ],
+        ));
   }).toList();
   ImageSliders = imageSliders;
 }
