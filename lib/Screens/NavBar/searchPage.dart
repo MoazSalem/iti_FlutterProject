@@ -192,7 +192,7 @@ class _searchPageState extends State<searchPage> {
     final searched = restaurantList.where((restaurant) {
       final title = restaurant.name.toString().toLowerCase();
       final type = restaurant.type.toString().toLowerCase();
-      return title.contains(query) || type.contains(query);
+      return title.contains(query.toLowerCase()) || type.contains(query.toLowerCase());
     }).toList();
     setState(() {
       searchedRestaurantList = searched;

@@ -171,7 +171,8 @@ class homePageState extends State<homePage> {
                                                 fontSize: 20,
                                                 fontWeight: FontWeight.bold)),
                                         subtitle: Padding(
-                                          padding: const EdgeInsets.only(top: 5),
+                                          padding:
+                                              const EdgeInsets.only(top: 5),
                                           child: Text(
                                             "${restaurantsMenu[reverseIndex].menu[index2].price} EGP",
                                             style: TextStyle(fontSize: 16),
@@ -184,12 +185,13 @@ class homePageState extends State<homePage> {
                                                 MainAxisAlignment.start,
                                             children: [
                                               IconButton(
-                                                constraints:
-                                                    BoxConstraints(maxWidth: 40),
+                                                constraints: BoxConstraints(
+                                                    maxWidth: 40),
                                                 onPressed: () {
                                                   setState(() {
                                                     Count++;
-                                                    restaurantsMenu[reverseIndex]
+                                                    restaurantsMenu[
+                                                            reverseIndex]
                                                         .menu[index2]
                                                         .count = Count;
                                                   });
@@ -200,16 +202,18 @@ class homePageState extends State<homePage> {
                                                 ),
                                               ),
                                               Padding(
-                                                padding: const EdgeInsets.all(6),
+                                                padding:
+                                                    const EdgeInsets.all(6),
                                                 child: Text(Count.toString()),
                                               ),
                                               IconButton(
-                                                constraints:
-                                                    BoxConstraints(maxWidth: 40),
+                                                constraints: BoxConstraints(
+                                                    maxWidth: 40),
                                                 onPressed: () {
                                                   setState(() {
                                                     Count == 0 ? null : Count--;
-                                                    restaurantsMenu[reverseIndex]
+                                                    restaurantsMenu[
+                                                            reverseIndex]
                                                         .menu[index2]
                                                         .count = Count;
                                                   });
@@ -412,6 +416,18 @@ class homePageState extends State<homePage> {
                 ),
               )),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      int temp = 0;
+      cart.forEach((element) {
+        temp += element.count;
+      });
+      cartCount = temp;
+    });
   }
 
   @override
